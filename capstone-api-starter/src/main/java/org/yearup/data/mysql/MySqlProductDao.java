@@ -22,33 +22,74 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String subCategory)
     {
         List<Product> products = new ArrayList<>();
+// Bug#2 bad logic before ,now fixed
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1");
+        List<Object> params = new ArrayList<>();
 
-        String sql = "SELECT * FROM products " +
-                "WHERE (category_id = ? OR ? = -1) " +
-                "   AND (price <= ? OR ? = -1) " +
-                "   AND (subcategory = ? OR ? = '') ";
+//        categoryId = categoryId == null ? -1 : categoryId;
+//        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
+//        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
+//        subCategory = subCategory == null ? "" : subCategory;
+//
+//        try (Connection connection = getConnection())
+//        {
+//            PreparedStatement statement = connection.prepareStatement(sql);
+//            statement.setInt(1, categoryId);
+//            statement.setInt(2, categoryId);
+//            statement.setBigDecimal(3, minPrice);
+//            statement.setBigDecimal(4, minPrice);
+//            statement.setString(5, subCategory);
+//            statement.setString(6, subCategory);
+//
+//            ResultSet row = statement.executeQuery();
+//
+//            while (row.next())
+//            {
+//                Product product = mapRow(row);
+//                products.add(product);
+//            }
+//        }
 
-        categoryId = categoryId == null ? -1 : categoryId;
-        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
-        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
-        subCategory = subCategory == null ? "" : subCategory;
-
-        try (Connection connection = getConnection())
+        //Corrected version for Bug#2
+        if (categoryId != null)
         {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, categoryId);
-            statement.setInt(2, categoryId);
-            statement.setBigDecimal(3, minPrice);
-            statement.setBigDecimal(4, minPrice);
-            statement.setString(5, subCategory);
-            statement.setString(6, subCategory);
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (minPrice != null)
+        {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null)
+        {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        if (subCategory != null && !subCategory.isBlank())
+        {
+            sql.append(" AND LOWER(subcategory) = LOWER(?)");
+            params.add(subCategory.trim());
+        }
+
+        sql.append(" ORDER BY product_id");
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString()))
+        {
+            for (int i = 0; i < params.size(); i++)
+            {
+                statement.setObject(i + 1, params.get(i));
+            }
 
             ResultSet row = statement.executeQuery();
 
             while (row.next())
             {
-                Product product = mapRow(row);
-                products.add(product);
+                products.add(mapRow(row));
             }
         }
         catch (SQLException e)

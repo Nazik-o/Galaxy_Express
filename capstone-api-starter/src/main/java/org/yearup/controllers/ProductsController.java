@@ -76,12 +76,14 @@ public class ProductsController
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")//before
+    @PreAuthorize("hasRole('ADMIN')") //  changed it so it makes sense
+    @ResponseStatus(HttpStatus.NO_CONTENT)// added this so if this method succeeds, return 204 No Content
     public void updateProduct(@PathVariable int id, @RequestBody Product product)
     {
         try
         {
-            productDao.create(product);
+            productDao.update(id, product); // Bug #2 fixed , updates existing row
         }
         catch(Exception ex)
         {
@@ -90,7 +92,9 @@ public class ProductsController
     }
 
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable int id)
     {
         try
