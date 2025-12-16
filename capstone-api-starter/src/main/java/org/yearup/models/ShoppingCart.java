@@ -42,5 +42,23 @@ public class ShoppingCart
 
         return total;
     }
+    public void addItem(Product product, int quantity)
+    {
+        int productId = product.getProductId();
+
+        if (items.containsKey(productId))
+        {
+            ShoppingCartItem existing = items.get(productId);
+            existing.setQuantity(existing.getQuantity() + quantity);
+            return;
+        }
+        ShoppingCartItem item = new ShoppingCartItem();
+        item.setProduct(product);
+        item.setQuantity(quantity);
+        item.setDiscountPercent(BigDecimal.ZERO);
+
+        items.put(productId, item);
+    }
+
 
 }
