@@ -14,7 +14,7 @@ import org.yearup.models.User;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("orders")
+@RequestMapping("/orders")
 @CrossOrigin
 @PreAuthorize("isAuthenticated()")
 public class OrdersController
@@ -30,7 +30,8 @@ public class OrdersController
         this.userDao = userDao;
     }
 
-    @PostMapping("")
+    // POST http://localhost:8080/orders (NO BODY)
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Order checkout(Principal principal)
     {
@@ -38,23 +39,22 @@ public class OrdersController
         {
             int userId = getUserId(principal);
 
+
             ShoppingCart cart = shoppingCartDao.getByUserId(userId);
             if (cart == null || cart.getItems() == null || cart.getItems().isEmpty())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shopping cart is empty.");
-
 
             return ordersDao.checkout(userId, cart);
         }
         catch (ResponseStatusException ex)
         {
-            throw ex;
+            throw ex; // keep 400/401/404 etc.
         }
         catch (Exception ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
-
     private int getUserId(Principal principal)
     {
         if (principal == null)
@@ -67,4 +67,3 @@ public class OrdersController
         return user.getId();
     }
 }
-

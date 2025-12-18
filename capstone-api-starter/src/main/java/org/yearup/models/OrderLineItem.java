@@ -1,4 +1,5 @@
 package org.yearup.models;
+
 import java.math.BigDecimal;
 
 public class OrderLineItem
@@ -28,3 +29,5 @@ public class OrderLineItem
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
 }
+
+
