@@ -19,10 +19,9 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     }
 
     @Override
-    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String subCategory)
-    {
+    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String subCategory) {
         List<Product> products = new ArrayList<>();
-// Bug#2 bad logic before ,now fixed
+// Phase 2 Bug#2 bad logic before ,now fixed
         StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -51,50 +50,45 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
 //        }
 
         //Corrected version for Bug#2
-        if (categoryId != null)
-        {
+        if (categoryId != null) {
             sql.append(" AND category_id = ?");
             params.add(categoryId);
         }
 
-        if (minPrice != null)
-        {
+        if (minPrice != null) {
             sql.append(" AND price >= ?");
             params.add(minPrice);
         }
 
-        if (maxPrice != null)
-        {
+        if (maxPrice != null) {
             sql.append(" AND price <= ?");
             params.add(maxPrice);
         }
 
-        if (subCategory != null && !subCategory.isBlank())
-        {
+        if (subCategory != null && !subCategory.isBlank()) {
             sql.append(" AND LOWER(subcategory) = LOWER(?)");
             params.add(subCategory.trim());
         }
 
         sql.append(" ORDER BY product_id");
 
+
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql.toString()))
-        {
-            for (int i = 0; i < params.size(); i++)
-            {
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
                 statement.setObject(i + 1, params.get(i));
             }
 
             ResultSet row = statement.executeQuery();
 
-            while (row.next())
-            {
+            while (row.next()) {
                 products.add(mapRow(row));
             }
         }
+
         catch (SQLException e)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error searching products", e);
         }
 
         return products;
@@ -108,17 +102,14 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         String sql = "SELECT * FROM products " +
                     " WHERE category_id = ? ";
 
-        try (Connection connection = getConnection())
-        {
-            PreparedStatement statement = connection.prepareStatement(sql);
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, categoryId);
 
-            ResultSet row = statement.executeQuery();
-
-            while (row.next())
-            {
-                Product product = mapRow(row);
-                products.add(product);
+            try (ResultSet row = statement.executeQuery()) {
+                while (row.next()) {
+                    products.add(mapRow(row));
+                }
             }
         }
         catch (SQLException e)
@@ -174,24 +165,20 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
 
             int rowsAffected = statement.executeUpdate();
 
-            if (rowsAffected > 0) {
-                // Retrieve the generated keys
-                ResultSet generatedKeys = statement.getGeneratedKeys();
-
-                if (generatedKeys.next()) {
-                    // Retrieve the auto-incremented ID
-                    int orderId = generatedKeys.getInt(1);
-
-                    // get the newly inserted category
-                    return getById(orderId);
+            try (ResultSet generatedKeys = statement.getGeneratedKeys())
+            {
+                if (generatedKeys.next())
+                {
+                    int newProductId = generatedKeys.getInt(1);
+                    return getById(newProductId);
                 }
             }
+            throw new RuntimeException("Creating product failed, no ID obtained.");
         }
         catch (SQLException e)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error creating product", e);
         }
-        return null;
     }
 
     @Override
@@ -209,6 +196,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
                 " WHERE product_id = ?;";
 
         try (Connection connection = getConnection())
+
         {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, product.getName());
@@ -237,6 +225,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
                 " WHERE product_id = ?;";
 
         try (Connection connection = getConnection())
+
         {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, productId);

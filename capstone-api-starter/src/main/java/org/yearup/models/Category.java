@@ -6,6 +6,11 @@ public class Category
     private String name;
     private String description;
 
+    public Category()
+    {
+        //constructor
+    }
+
     public Category(int categoryId, String name, String description)
     {
         this.categoryId = categoryId;
