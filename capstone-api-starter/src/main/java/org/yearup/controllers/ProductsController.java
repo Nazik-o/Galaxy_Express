@@ -12,18 +12,18 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("products")
+@RequestMapping("/products")
 @CrossOrigin
 public class ProductsController
 {
-    private ProductDao productDao;
+    private final ProductDao productDao;
 
     @Autowired
     public ProductsController(ProductDao productDao)
     {
         this.productDao = productDao;
     }
-
+// __________GET /products_______________
     @GetMapping("")
     @PreAuthorize("permitAll()")
     public List<Product> search(@RequestParam(name="cat", required = false) Integer categoryId,
@@ -36,45 +36,62 @@ public class ProductsController
         {
             return productDao.search(categoryId, minPrice, maxPrice, subCategory);
         }
-        catch(Exception ex)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            //if DAO controller throws 400
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            //unexpected issue should be a 500
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
-
-    @GetMapping("{id}")
+//_______________GET/products________________________
+    @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
-    public Product getById(@PathVariable int id )
-    {
-        try
-        {
+    public Product getById(@PathVariable int id) {
+        try {
             var product = productDao.getById(id);
 
-            if(product == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            if (product == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
 
             return product;
         }
-        catch(Exception ex)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            //keep 404
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            //unexpected errors => 500
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
 
+//__________________POST /products____________
     @PostMapping()
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     public Product addProduct(@RequestBody Product product)
     {
         try
         {
             return productDao.create(product);
         }
-        catch(Exception ex)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
-
+    // _________________PUT /products_____________________
     @PutMapping("{id}")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")//before
     @PreAuthorize("hasRole('ADMIN')") //  changed it so it makes sense
@@ -83,14 +100,19 @@ public class ProductsController
     {
         try
         {
-            productDao.update(id, product); // Bug #2 fixed , updates existing row
+            //Phase 2 bug fix: this must UPDATE, not INSERT
+            productDao.update(id, product);
         }
-        catch(Exception ex)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
-
+//____________________________DELETE /products__________________________________
     @DeleteMapping("{id}")
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PreAuthorize("hasRole('ADMIN')")
@@ -100,15 +122,17 @@ public class ProductsController
         try
         {
             var product = productDao.getById(id);
-
-            if(product == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
+            if (product == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
             productDao.delete(id);
         }
-        catch(Exception ex)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.", ex);
         }
     }
 }
