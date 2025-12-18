@@ -59,7 +59,7 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
                 ShoppingCartItem item = new ShoppingCartItem();
                 item.setProduct(product);
                 item.setQuantity(quantity);
-                item.setDiscountPercent(BigDecimal.ZERO); // matches spec "discountPercent": 0
+                item.setDiscountPercent(BigDecimal.ZERO);
 
                 cart.add(item);
             }
@@ -125,7 +125,7 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
             statement.setInt(3, productId);
 
             int rows = statement.executeUpdate();
-            return rows > 0; // true only if item existed
+            return rows > 0;
         }
         catch (SQLException e)
         {

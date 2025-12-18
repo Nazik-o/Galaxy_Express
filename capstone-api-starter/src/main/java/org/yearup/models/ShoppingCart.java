@@ -13,6 +13,7 @@ public class ShoppingCart
         return items;
     }
 
+    // this allows replacing the entire cart map.
     public void setItems(Map<Integer, ShoppingCartItem> items)
     {
         this.items = items;
@@ -23,9 +24,25 @@ public class ShoppingCart
         return items.containsKey(productId);
     }
 
+
+   //If the product already exists, increment quantity instead of overwriting
+
     public void add(ShoppingCartItem item)
     {
-        items.put(item.getProductId(), item);
+        if (item == null)
+            return;
+
+        int productId = item.getProductId();
+
+        if (items.containsKey(productId))
+        {
+            ShoppingCartItem existing = items.get(productId);
+            existing.setQuantity(existing.getQuantity() + item.getQuantity());
+        }
+        else
+        {
+            items.put(productId, item);
+        }
     }
 
     public ShoppingCartItem get(int productId)
@@ -33,17 +50,23 @@ public class ShoppingCart
         return items.get(productId);
     }
 
+    //Returns the total cost by summing each item's line total.
     public BigDecimal getTotal()
     {
-        BigDecimal total = items.values()
-                                .stream()
-                                .map(i -> i.getLineTotal())
-                                .reduce( BigDecimal.ZERO, (lineTotal, subTotal) -> subTotal.add(lineTotal));
-
-        return total;
+        return items.values()
+                .stream()
+                .map(ShoppingCartItem::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+
+     //If product exists, increment quantity.
+
     public void addItem(Product product, int quantity)
     {
+        if (product == null || quantity <= 0)
+            return;
+
         int productId = product.getProductId();
 
         if (items.containsKey(productId))
@@ -52,6 +75,7 @@ public class ShoppingCart
             existing.setQuantity(existing.getQuantity() + quantity);
             return;
         }
+
         ShoppingCartItem item = new ShoppingCartItem();
         item.setProduct(product);
         item.setQuantity(quantity);
@@ -59,6 +83,4 @@ public class ShoppingCart
 
         items.put(productId, item);
     }
-
-
 }

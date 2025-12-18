@@ -18,10 +18,10 @@ import java.security.Principal;
 @RequestMapping("/cart")
 @CrossOrigin
 @PreAuthorize("isAuthenticated()")
-// only logged in users should have access to these actions
+
 public class ShoppingCartController
 {
-    // a shopping cart requires
+
     private final ShoppingCartDao shoppingCartDao;
     private final UserDao userDao;
     private final ProductDao productDao;

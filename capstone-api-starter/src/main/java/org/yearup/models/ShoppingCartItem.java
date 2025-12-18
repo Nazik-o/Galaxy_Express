@@ -44,17 +44,20 @@ public class ShoppingCartItem
     @JsonIgnore
     public int getProductId()
     {
-        return this.product.getProductId();
+        return (product == null) ? 0 : product.getProductId();
     }
-
     public BigDecimal getLineTotal()
     {
-        BigDecimal basePrice = product.getPrice();
-        BigDecimal quantity = new BigDecimal(this.quantity);
+        if (product == null || product.getPrice() == null)
+            return BigDecimal.ZERO;
 
-        BigDecimal subTotal = basePrice.multiply(quantity);
-        BigDecimal discountAmount = subTotal.multiply(discountPercent);
+        BigDecimal basePrice = product.getPrice();
+        BigDecimal qty = BigDecimal.valueOf(this.quantity);
+
+        BigDecimal subTotal = basePrice.multiply(qty);
+        BigDecimal discountAmount = subTotal.multiply(discountPercent == null ? BigDecimal.ZERO : discountPercent);
 
         return subTotal.subtract(discountAmount);
     }
+
 }
