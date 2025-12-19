@@ -173,9 +173,13 @@ capstone-client-easyshop/
 <img width="1621" height="923" alt="Screenshot 2025-12-19 at 8 03 10 AM" src="https://github.com/user-attachments/assets/00c77900-acee-4ee7-92a7-3dd2710af34c" />
 ---
 ### This is how it looks:
+
 <img width="1621" height="923" alt="Screenshot 2025-12-19 at 8 03 10 AM" src="https://github.com/user-attachments/assets/ae57ec65-d235-49d5-9154-0e5de0d1cf84" />
+
 <img width="1704" height="943" alt="Screenshot 2025-12-19 at 8 05 05 AM" src="https://github.com/user-attachments/assets/a706243d-0fb2-4e48-b6ee-91f9a32e91b9" />
+
 <img width="1708" height="921" alt="Screenshot 2025-12-19 at 8 05 20 AM" src="https://github.com/user-attachments/assets/d4f2ec54-8cd3-4e6b-8238-6c11c090a36a" />
+
 <img width="1702" height="899" alt="Screenshot 2025-12-19 at 8 05 30 AM" src="https://github.com/user-attachments/assets/21aa4e81-ffd6-4143-9761-bf8d9bd2e07b" />
 
 
