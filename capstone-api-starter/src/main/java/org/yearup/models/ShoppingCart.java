@@ -24,12 +24,17 @@ public class ShoppingCart
         return items.containsKey(productId);
     }
 
+    public boolean isEmpty()
+    {
+        return items == null || items.isEmpty();
+    }
+
 
    //If the product already exists, increment quantity instead of overwriting
 
     public void add(ShoppingCartItem item)
     {
-        if (item == null)
+        if (item == null || item.getProduct() == null)
             return;
 
         int productId = item.getProductId();

@@ -9,7 +9,7 @@ public class Product
     private BigDecimal price;
     private int categoryId;
     private String description;
-    private String subCategory;
+    private String subcategory;
     private int stock;
     private boolean isFeatured;
     private String imageUrl;
@@ -25,7 +25,7 @@ public class Product
         this.price = price;
         this.categoryId = categoryId;
         this.description = description;
-        this.subCategory = subCategory;
+        this.subcategory = subcategory;
         this.stock = stock;
         this.isFeatured = isFeatured;
         this.imageUrl = imageUrl;
@@ -83,12 +83,12 @@ public class Product
 
     public String getSubCategory()
     {
-        return subCategory;
+        return subcategory;
     }
 
     public void setSubCategory(String subCategory)
     {
-        this.subCategory = subCategory;
+        this.subcategory = subCategory;
     }
 
     public int getStock()

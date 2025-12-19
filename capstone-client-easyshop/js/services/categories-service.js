@@ -1,6 +1,31 @@
 let categoryService;
 
 class CategoryService {
+  getAllCategories(callback) {
+    const url = `${config.baseUrl}/categories`;
+    const headers = userService?.getHeaders ? userService.getHeaders() : {};
+
+    return axios.get(url, { headers })
+      .then(response => {
+        if (typeof callback === "function") {
+          callback(response.data);
+        }
+      })
+      .catch(() => {
+        templateBuilder.append("error", { error: "Loading categories failed." }, "errors");
+      });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  categoryService = new CategoryService();
+});
+
+
+
+/*let categoryService;
+
+class CategoryService {
 
 
     getAllCategories(callback)
@@ -24,4 +49,4 @@ class CategoryService {
 
 document.addEventListener('DOMContentLoaded', () => {
     categoryService = new CategoryService();
-});
+});*/

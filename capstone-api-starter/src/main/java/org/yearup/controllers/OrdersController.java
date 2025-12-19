@@ -1,5 +1,6 @@
 package org.yearup.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class OrdersController
     private final OrdersDao ordersDao;
     private final ShoppingCartDao shoppingCartDao;
     private final UserDao userDao;
+
 
     public OrdersController(OrdersDao ordersDao, ShoppingCartDao shoppingCartDao, UserDao userDao)
     {
@@ -48,7 +50,7 @@ public class OrdersController
         }
         catch (ResponseStatusException ex)
         {
-            throw ex; // keep 400/401/404 etc.
+            throw ex;
         }
         catch (Exception ex)
         {

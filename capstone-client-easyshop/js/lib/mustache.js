@@ -16,7 +16,8 @@ var Mustache = {
   debug: true,
   stack: " ",
   context: {},
-  to_html: function(template, view) {
+  const html = Mustache.to_html(template, value);
+ {
     return this.render(template, view);
   },
 

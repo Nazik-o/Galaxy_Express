@@ -84,7 +84,7 @@ public class MySqlOrdersDao extends MySqlDaoBase implements OrdersDao
 
             connection.commit();
 
-            // 4️⃣ Return minimal Order confirmation
+
             Order order = new Order();
             order.setOrderId(orderId);
             order.setUserId(userId);

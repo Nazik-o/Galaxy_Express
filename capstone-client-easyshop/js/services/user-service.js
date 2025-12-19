@@ -1,4 +1,110 @@
+let userService;
 
+class UserService {
+  currentUser = {};
+
+  constructor() {
+    this.loadUser();
+  }
+
+  // Use ONE header function
+  getHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    if (this.currentUser.token) {
+      headers.Authorization = `Bearer ${this.currentUser.token}`;
+    }
+    return headers;
+  }
+
+  saveUser(data) {
+    this.currentUser = {
+      token: data.token,
+      userId: data.user.id,
+      username: data.user.username,
+      role: data.user.authorities?.[0]?.name ?? "USER"
+    };
+    localStorage.setItem("user", JSON.stringify(this.currentUser));
+  }
+
+  loadUser() {
+    const user = localStorage.getItem("user");
+    if (user) {
+      this.currentUser = JSON.parse(user);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${this.currentUser.token}`;
+    }
+  }
+
+  isLoggedIn() {
+    return !!this.currentUser.token;
+  }
+
+  getUserName() {
+    return this.isLoggedIn() ? this.currentUser.username : "";
+  }
+
+  getCurrentUser() {
+    return this.currentUser;
+  }
+
+  setHeaderLogin() {
+    const user = {
+      username: this.getUserName(),
+      loggedin: this.isLoggedIn(),
+      loggedout: !this.isLoggedIn()
+    };
+    templateBuilder.build("header", user, "header-user");
+  }
+
+  register(username, password, confirm) {
+    const url = `${config.baseUrl}/register`;
+    const payload = { username, password, confirmPassword: confirm, role: "USER" };
+
+    return axios.post(url, payload)
+      .then(res => console.log(res.data))
+      .catch(() => {
+        templateBuilder.append("error", { error: "User registration failed." }, "errors");
+        throw new Error("User registration failed");
+      });
+  }
+
+  login(username, password) {
+    const url = `${config.baseUrl}/login`;
+
+    return axios.post(url, { username, password })
+      .then(res => {
+        this.saveUser(res.data);
+        this.setHeaderLogin();
+
+        axios.defaults.headers.common["Authorization"] = `Bearer ${this.currentUser.token}`;
+
+        productService.enableButtons();
+        return cartService.loadCart(); // ✅ allow callers to wait
+      })
+      .catch(err => {
+        templateBuilder.append("error", { error: "Login failed." }, "errors");
+        throw err;
+      });
+  }
+
+  logout() {
+    localStorage.removeItem("user");
+    delete axios.defaults.headers.common["Authorization"];
+
+    this.currentUser = {};
+    this.setHeaderLogin();
+    productService.enableButtons();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  userService = new UserService();
+  userService.setHeaderLogin();
+});
+
+
+
+
+/*
 let userService;
 
 class UserService {
@@ -147,4 +253,5 @@ class UserService {
 document.addEventListener('DOMContentLoaded', () => {
     userService = new UserService();
     userService.setHeaderLogin();
-});
+});*/
+

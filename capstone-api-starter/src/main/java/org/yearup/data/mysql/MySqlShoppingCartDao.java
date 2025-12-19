@@ -38,30 +38,32 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         {
             statement.setInt(1, userId);
 
-            ResultSet row = statement.executeQuery();
-            while (row.next())
+            try (ResultSet row = statement.executeQuery())
             {
-                int productId = row.getInt("product_id");
-                int quantity = row.getInt("quantity");
+                while (row.next())
+                {
+                    int productId = row.getInt("product_id");
+                    int quantity = row.getInt("quantity");
 
-                Product product = new Product(
-                        productId,
-                        row.getString("name"),
-                        row.getBigDecimal("price"),
-                        row.getInt("category_id"),
-                        row.getString("description"),
-                        row.getString("subcategory"),
-                        row.getInt("stock"),
-                        row.getBoolean("featured"),
-                        row.getString("image_url")
-                );
+                    Product product = new Product(
+                            productId,
+                            row.getString("name"),
+                            row.getBigDecimal("price"),
+                            row.getInt("category_id"),
+                            row.getString("description"),
+                            row.getString("subcategory"),
+                            row.getInt("stock"),
+                            row.getBoolean("featured"),
+                            row.getString("image_url")
+                    );
 
-                ShoppingCartItem item = new ShoppingCartItem();
-                item.setProduct(product);
-                item.setQuantity(quantity);
-                item.setDiscountPercent(BigDecimal.ZERO);
+                    ShoppingCartItem item = new ShoppingCartItem();
+                    item.setProduct(product);
+                    item.setQuantity(quantity);
+                    item.setDiscountPercent(BigDecimal.ZERO);
 
-                cart.add(item);
+                    cart.add(item);
+                }
             }
 
             return cart;
@@ -75,11 +77,10 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     @Override
     public void addProduct(int userId, int productId)
     {
-
         String updateSql =
-                "UPDATE shopping_cart " + "SET quantity = quantity + 1 " +
-                "WHERE user_id = ? AND product_id = ?;";
-
+                "UPDATE shopping_cart " +
+                        "SET quantity = quantity + 1 " +
+                        "WHERE user_id = ? AND product_id = ?;";
 
         String insertSql =
                 "INSERT INTO shopping_cart (user_id, product_id, quantity) " +
@@ -87,15 +88,17 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
         try (Connection connection = getConnection())
         {
+            // First try to increment quantity (if row exists)
             try (PreparedStatement updateStmt = connection.prepareStatement(updateSql))
             {
                 updateStmt.setInt(1, userId);
                 updateStmt.setInt(2, productId);
 
                 int rows = updateStmt.executeUpdate();
-                if (rows > 0) return;
+                if (rows > 0) return; // item existed; we incremented it
             }
 
+            // Otherwise insert new row
             try (PreparedStatement insertStmt = connection.prepareStatement(insertSql))
             {
                 insertStmt.setInt(1, userId);
@@ -112,6 +115,28 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     @Override
     public boolean updateQuantity(int userId, int productId, int quantity)
     {
+        // Better behavior: if quantity <= 0, remove the item from the cart
+        if (quantity <= 0)
+        {
+            String deleteSql =
+                    "DELETE FROM shopping_cart " +
+                            "WHERE user_id = ? AND product_id = ?;";
+
+            try (Connection connection = getConnection();
+                 PreparedStatement statement = connection.prepareStatement(deleteSql))
+            {
+                statement.setInt(1, userId);
+                statement.setInt(2, productId);
+
+                int rows = statement.executeUpdate();
+                return rows > 0;
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
         String sql =
                 "UPDATE shopping_cart " +
                         "SET quantity = ? " +

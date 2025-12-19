@@ -1,16 +1,37 @@
+<div class="filter-box">&nbsp;</div>
 
-<div class="filter-box">
-  &nbsp;
-
-</div>
 <div id="content" class="content-form">
-  <div class="cart-header">
-    <h1>Cart</h1>
-    <button class="btn btn-danger" onclick="clearCart()">Clear</button>
-  </div>
-<div id="cart-item-list">
+    <div class="cart-header">
+        <h1>Cart</h1>
+
+        <div class="cart-actions">
+            <button class="btn btn-danger" onclick="clearCart(); return false;">Clear</button>
+            <button class="btn btn-primary" onclick="checkout(); return false;">Checkout</button>
+
+
+        </div>
+    </div>
+
+    <div id="cart-item-list"></div>
+
+    <!-- show total -->
+    <div class="cart-total">
+        <strong>Total:</strong> $<span id="cart-total">0</span>
+    </div>
 </div>
 
-</div>
+<!--<div class="filter-box">-->
+<!--  &nbsp;-->
+
+<!--</div>-->
+<!--<div id="content" class="content-form">-->
+<!--  <div class="cart-header">-->
+<!--    <h1>Cart</h1>-->
+<!--    <button class="btn btn-danger" onclick="clearCart()">Clear</button>-->
+<!--  </div>-->
+<!--<div id="cart-item-list">-->
+<!--</div>-->
+
+<!--</div>-->
 
 
